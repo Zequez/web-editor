@@ -1,0 +1,128 @@
+<div style="display: flex; height: 100vh">
+  <main style="height: 100%; max-width: 600px; flex-grow: 1">
+    <iframe style="height: 100%; width: 100%" src=""></iframe>
+  </main>
+  <div style="width: 3px; background: black; opacity: 50%"></div>
+  <code
+    id="code-area"
+    style="flex-grow: 1; white-space: pre"
+    contenteditable="true"
+  ></code>
+  <!-- <iframe src="codeMirror.html"></iframe> -->
+</div>
+
+<div
+  id="save-flasher"
+  style="
+    position: fixed;
+    inset: 0;
+    background: black;
+    opacity: 0;
+    pointer-events: none;
+  "
+></div>
+
+<script>
+  const saveFlasher = document.getElementById("save-flasher");
+  const codeArea = document.getElementById("code-area");
+  const iframe = document.getElementsByTagName("iframe")[0];
+
+  const { component } = getParams();
+  const isSelfEditing = component === "editor.html";
+  const localhost = "http://localhost:789";
+
+  console.log({
+    component,
+    isSelfEditing,
+    localhost,
+  });
+
+  loadFile();
+  addKeyBindings();
+
+  function getParams() {
+    const match = document.location.search.match(/component=([^\/]+)/);
+    return {
+      component: match ? match[1] : null,
+    };
+  }
+
+  function setCode(fileText) {
+    codeArea.innerText = fileText;
+  }
+
+  function readCode() {
+    return codeArea.innerText;
+  }
+
+  function loadFile() {
+    fetch(`${localhost}/${component}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Response not ok");
+        }
+        return response.text();
+      })
+      .then((data) => {
+        console.log("Received file", data);
+        setCode(data);
+      })
+      .catch((err) => {
+        setCode("");
+      });
+
+    if (!isSelfEditing) {
+      iframe.src = component;
+    } else {
+      iframe.src = "welcome.html";
+    }
+  }
+
+  function animate(el, keyframes, time) {
+    el.style.animation = `${keyframes} ease ${time}s`;
+    setTimeout(() => {
+      el.style.animation = "";
+    }, time * 1000);
+  }
+
+  async function save() {
+    console.log("SAVE");
+    animate(saveFlasher, "save-flash", 1);
+    await fetch(`${localhost}/${component}?save`, {
+      method: "POST",
+      body: readCode(),
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        if (isSelfEditing) {
+          window.location.reload();
+        } else {
+          iframe.contentWindow.location.reload();
+        }
+      });
+  }
+
+  function addKeyBindings() {
+    document.addEventListener("keydown", (e) => {
+      if (e.metaKey && e.key === "s") {
+        e.preventDefault();
+        save();
+      }
+    });
+  }
+</script>
+
+<link rel="stylesheet" href="global.css" />
+<style>
+  @keyframes save-flash {
+    0% {
+      opacity: 25%;
+    }
+
+    100% {
+      opacity: 0%;
+    }
+  }
+</style>

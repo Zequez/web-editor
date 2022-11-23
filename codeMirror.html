@@ -1,0 +1,35 @@
+<div id="code-area" style="height: 100%; width: 100%;"></div>
+<script src="https://codemirror.net/6/codemirror.js"></script>
+
+<script>
+  const codeArea = document.getElementById("code-area");
+  createCodeMirror();
+
+  function createCodeMirror() {
+    const { EditorState } = CM["@codemirror/state"];
+    const { EditorView, keymap } = CM["@codemirror/view"];
+    const { defaultKeymap } = CM["@codemirror/commands"];
+    const { html } = CM["@codemirror/lang-html"];
+    const startState = EditorState.create({
+      doc: "",
+      extensions: [keymap.of(defaultKeymap)],
+    });
+    const view = new EditorView({
+      extensions: [html()],
+      state: startState,
+      parent: codeArea,
+    });
+
+    return view;
+  }
+
+  function setCode(fileText) {
+    codeMirror.viewState.state.update({
+      changes: { from: 0, insert: fileText },
+    });
+  }
+
+  function readCode() {
+    codeMirror.viewState.state.doc.toString();
+  }
+</script>

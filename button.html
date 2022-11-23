@@ -1,0 +1,31 @@
+<button>Whatsap stst this is cool</button>
+
+<script>
+  console.log("Button log");
+  if (window.parent === window) {
+    console.log("Edit mode");
+    document.getElementsByTagName("button")[0].innerHTML = "Edit mode";
+  }
+</script>
+
+<style>
+  body {
+    background: white;
+  }
+
+  button {
+    background: rgb(77, 170, 93);
+    border: 0;
+    padding: 8px;
+    color: white;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+
+  button:hover {
+    background: rgb(49, 180, 71);
+    cursor: pointer;
+  }
+</style>
+
+<link rel="stylesheet" href="global.css" />
